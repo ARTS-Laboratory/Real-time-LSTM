@@ -4,15 +4,27 @@
 
 close all;
 clear all;
-data = jsondecode(fileread('C:\Users\Owner\Downloads\data_6_with_FFT.json'));
+data = jsondecode(fileread('data_6_with_FFT.json'));
 
 % Coble Data     
 y_test = xlsread("y_test.csv")';
 y_test = y_test(:,1);
-y_predict_2ms = xlsread("y_predict - 2.5ms.csv")';
-y_predict_3ms = xlsread("y_predict - 3ms.csv")';
-y_predict_5ms = xlsread("y_predict - 5ms.csv")';
-y_predict_10ms = xlsread("y_predict - 10ms.csv")';
+y_predict_2_5ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\2.5ms.csv")';
+y_predict_3ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\3ms.csv")';
+y_predict_3_5ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\3.5ms.csv")';
+y_predict_4ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\4ms.csv")';
+y_predict_4_5ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\4.5ms.csv")';
+y_predict_5ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\5ms.csv")';
+y_predict_5_5ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\5.5ms.csv")';
+y_predict_6ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\6ms.csv")';
+y_predict_6_5ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\6.5ms.csv")';
+y_predict_7ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\7ms.csv")';
+y_predict_7_5ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\7.5ms.csv")';
+y_predict_8ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\8ms.csv")';
+y_predict_8_5ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\8.5ms.csv")';
+y_predict_9ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\9ms.csv")';
+y_predict_9_5ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\9.5ms.csv")';
+y_predict_10ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\10ms.csv")';
 
 %Raw Data
 x = data.acceleration_data';
@@ -36,10 +48,22 @@ time = resample(time,M,L);
 time_sub = resample(time,L,M);
 
 %Find SNR(dB)
-ypred_2ms = subsample_snr(signal, time, time_sub, y_predict_2ms)
-ypred_3ms = subsample_snr(signal, time, time_sub, y_predict_3ms)
-ypred_5ms = subsample_snr(signal, time, time_sub, y_predict_5ms)
-ypred_10ms = subsample_snr(signal, time, time_sub, y_predict_10ms)
+ypred_2ms = subsample_snr(signal, time, time_sub, y_predict_2_5ms);
+ypred_3ms = subsample_snr(signal, time, time_sub, y_predict_3ms);
+ypred_5ms = subsample_snr(signal, time, time_sub, y_predict_3_5ms);
+ypred_10ms = subsample_snr(signal, time, time_sub, y_predict_4ms);
+ypred_2ms = subsample_snr(signal, time, time_sub, y_predict_4_5ms);
+ypred_3ms = subsample_snr(signal, time, time_sub, y_predict_5ms);
+ypred_5ms = subsample_snr(signal, time, time_sub, y_predict_5_5ms);
+ypred_10ms = subsample_snr(signal, time, time_sub, y_predict_6ms);
+ypred_2ms = subsample_snr(signal, time, time_sub, y_predict_6_5ms);
+ypred_3ms = subsample_snr(signal, time, time_sub, y_predict_7ms);
+ypred_5ms = subsample_snr(signal, time, time_sub, y_predict_7_5ms);
+ypred_10ms = subsample_snr(signal, time, time_sub, y_predict_8ms);
+ypred_2ms = subsample_snr(signal, time, time_sub, y_predict_8_5ms);
+ypred_3ms = subsample_snr(signal, time, time_sub, y_predict_9ms);
+ypred_5ms = subsample_snr(signal, time, time_sub, y_predict_9_5ms);
+ypred_10ms = subsample_snr(signal, time, time_sub, y_predict_10ms);
 
 
 
@@ -49,7 +73,7 @@ function SNR = subsample_snr(signal, time, time_sub, y_pred)
     
     subsample_snr = [];
     signal_pred_zoh = myzoh(time,time_sub,double(y_pred));
-    % compute error signal from ze
+    % compute error signal from zero order hold
     error_signal = signal - signal_pred_zoh;
     % snip lead-in for MLP
         
@@ -85,6 +109,7 @@ function SNR = subsample_snr(signal, time, time_sub, y_pred)
         % compute SNR
         SNR = [subsample_snr,log10(signal_power / error_power) * 20];
         SNR = abs(SNR);
+        
 end 
         
         
