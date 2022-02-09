@@ -4,15 +4,27 @@
 
 close all;
 clear all;
-data = jsondecode(fileread('C:\Users\Owner\Downloads\data_6_with_FFT.json'));
+data = jsondecode(fileread('data_6_with_FFT.json'));
 
 % Coble Data     
 y_test = xlsread("y_test.csv")';
 y_test = y_test(:,1);
-y_predict_2ms = xlsread("y_predict - 2.5ms.csv")';
-y_predict_3ms = xlsread("y_predict - 3ms.csv")';
-y_predict_5ms = xlsread("y_predict - 5ms.csv")';
-y_predict_10ms = xlsread("y_predict - 10ms.csv")';
+y_predict_2_5ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\2.5ms.csv")';
+y_predict_3ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\3ms.csv")';
+y_predict_3_5ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\3.5ms.csv")';
+y_predict_4ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\4ms.csv")';
+y_predict_4_5ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\4.5ms.csv")';
+y_predict_5ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\5ms.csv")';
+y_predict_5_5ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\5.5ms.csv")';
+y_predict_6ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\6ms.csv")';
+y_predict_6_5ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\6.5ms.csv")';
+y_predict_7ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\7ms.csv")';
+y_predict_7_5ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\7.5ms.csv")';
+y_predict_8ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\8ms.csv")';
+y_predict_8_5ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\8.5ms.csv")';
+y_predict_9ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\9ms.csv")';
+y_predict_9_5ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\9.5ms.csv")';
+y_predict_10ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\10ms.csv")';
 
 %Raw Data
 x = data.acceleration_data';
@@ -36,10 +48,22 @@ time = resample(time,M,L);
 time_sub = resample(time,L,M);
 
 %Find SNR(dB)
-ypred_2ms = subsample_snr(signal, time, time_sub, y_predict_2ms)
-ypred_3ms = subsample_snr(signal, time, time_sub, y_predict_3ms)
-ypred_5ms = subsample_snr(signal, time, time_sub, y_predict_5ms)
-ypred_10ms = subsample_snr(signal, time, time_sub, y_predict_10ms)
+SNR_2_5ms = subsample_snr(signal, time, time_sub, y_predict_2_5ms)
+SNR_3ms = subsample_snr(signal, time, time_sub, y_predict_3ms)
+SNR_3_5ms = subsample_snr(signal, time, time_sub, y_predict_3_5ms)
+SNR_4ms = subsample_snr(signal, time, time_sub, y_predict_4ms)
+SNR_4_5ms = subsample_snr(signal, time, time_sub, y_predict_4_5ms)
+SNR_5ms = subsample_snr(signal, time, time_sub, y_predict_5ms)
+SNR_5_5ms = subsample_snr(signal, time, time_sub, y_predict_5_5ms)
+SNR_6ms = subsample_snr(signal, time, time_sub, y_predict_6ms)
+SNR_6_5ms = subsample_snr(signal, time, time_sub, y_predict_6_5ms)
+SNR_7ms = subsample_snr(signal, time, time_sub, y_predict_7ms)
+SNR_7_5ms = subsample_snr(signal, time, time_sub, y_predict_7_5ms)
+SNR_8ms = subsample_snr(signal, time, time_sub, y_predict_8ms)
+SNR_8_5ms = subsample_snr(signal, time, time_sub, y_predict_8_5ms)
+SNR_9ms = subsample_snr(signal, time, time_sub, y_predict_9ms)
+SNR_9_5ms = subsample_snr(signal, time, time_sub, y_predict_9_5ms)
+SNR_10ms = subsample_snr(signal, time, time_sub, y_predict_10ms)
 
 
 
