@@ -5,30 +5,30 @@
 close all;
 clear all;
 data = jsondecode(fileread('data_6_with_FFT.json'));
-
 % Coble Data     
-y_test = xlsread("y_test.csv")';
+y_test = csvread("y_test.csv")';
 y_test = y_test(:,1);
-y_predict_2_5ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\2.5ms.csv")';
-y_predict_3ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\3ms.csv")';
-y_predict_3_5ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\3.5ms.csv")';
-y_predict_4ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\4ms.csv")';
-y_predict_4_5ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\4.5ms.csv")';
-y_predict_5ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\5ms.csv")';
-y_predict_5_5ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\5.5ms.csv")';
-y_predict_6ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\6ms.csv")';
-y_predict_6_5ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\6.5ms.csv")';
-y_predict_7ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\7ms.csv")';
-y_predict_7_5ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\7.5ms.csv")';
-y_predict_8ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\8ms.csv")';
-y_predict_8_5ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\8.5ms.csv")';
-y_predict_9ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\9ms.csv")';
-y_predict_9_5ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\9.5ms.csv")';
-y_predict_10ms = xlsread("\Users\bpriddy\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\10ms.csv")';
+y_predict_2_5ms = csvread("\Users\dncob\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\2.5ms.csv")';
+y_predict_3ms = csvread("\Users\dncob\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\3ms.csv")';
+y_predict_3_5ms = csvread("\Users\dncob\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\3.5ms.csv")';
+y_predict_4ms = csvread("\Users\dncob\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\4ms.csv")';
+y_predict_4_5ms = csvread("\Users\dncob\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\4.5ms.csv")';
+y_predict_5ms = csvread("\Users\dncob\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\5ms.csv")';
+y_predict_5_5ms = csvread("\Users\dncob\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\5.5ms.csv")';
+y_predict_6ms = csvread("\Users\dncob\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\6ms.csv")';
+y_predict_6_5ms = csvread("\Users\dncob\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\6.5ms.csv")';
+y_predict_7ms = csvread("\Users\dncob\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\7ms.csv")';
+y_predict_7_5ms = csvread("\Users\dncob\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\7.5ms.csv")';
+y_predict_8ms = csvread("\Users\dncob\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\8ms.csv")';
+y_predict_8_5ms = csvread("\Users\dncob\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\8.5ms.csv")';
+y_predict_9ms = csvread("\Users\dncob\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\9ms.csv")';
+y_predict_9_5ms = csvread("\Users\dncob\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\9.5ms.csv")';
+y_predict_10ms = csvread("\Users\dncob\Documents\GitHub\Real-time-LSTM\data\input_rate_outputs\10ms.csv")';
 
 %Raw Data
 x = data.acceleration_data';
-y = data.measured_pin_location';
+y = csvread("C:\Users\dncob\Documents\GitHub\Real-time-LSTM\data\y_test.csv")';
+y = y(1,:);
 signal = y;
 time = data.time_acceleration_data';
 
