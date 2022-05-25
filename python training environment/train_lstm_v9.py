@@ -13,7 +13,7 @@ from sklearn.metrics import mean_squared_error
 """
 Basically doing the same thing as train_full_model_v3 but now with a lot more
 models (72). For all models we'll be leaving the impulses profile for 
-validation. Instead, we are changing the sampling rate.pip 
+validation. Instead, we are changing the sampling rate.
 
 TensorFlow 2.5.0
 Numpy 1.19.5
