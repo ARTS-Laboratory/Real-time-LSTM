@@ -141,7 +141,6 @@ while(index < 210):
     )
     model.compile(loss="mse",
         optimizer="adam",
-        metrics = ['accuracy']
     )
     y_test = np.expand_dims(y_test, -1)
     
@@ -203,7 +202,7 @@ for cells in cells_scheme:
 #%% SNR table
 
 #snr calculated across the entire dataset
-snr_table = np.zeros(len(cells_scheme), len(output_period_scheme), len(units_scheme))
+snr_table = np.zeros((len(cells_scheme), len(output_period_scheme), len(units_scheme)))
 
 for c in range(len(cells_scheme)):
     cells = cells_scheme[c]
@@ -243,38 +242,40 @@ for c in range(len(cells_scheme)):
             snr_table[c,i,j] = snr
 
 print(snr_table)
-np.savetxt("./prediction results/SNR validation table.csv", snr_table, delimiter=',')
+np.savetxt("./prediction results/1 Cell SNR table.csv", snr_table[0], delimiter=',')
+np.savetxt("./prediction results/2 Cell SNR table.csv", snr_table[1], delimiter=',')
+np.savetxt("./prediction results/3 Cell SNR table.csv", snr_table[2], delimiter=',')
 
 
 #%% save model in ONNX format
-import tf2onnx
-import onnx
-import onnxruntime as rt
+# import tf2onnx
+# import onnx
+# import onnxruntime as rt
 
-sample_period = output_periods[3]*(10**-6)/16
-(X, X_train, X_test), (y, y_train, y_test), \
-    (t, t_test, t_train), pin_scaler, acc_scaler = preprocess(sample_period)
+# sample_period = output_periods[3]*(10**-6)/16
+# (X, X_train, X_test), (y, y_train, y_test), \
+#     (t, t_test, t_train), pin_scaler, acc_scaler = preprocess(sample_period)
 
-model = keras.models.load_model("./model_saves/400us3cells15units")
-spec = (tf.TensorSpec((None, None, 16), tf.double, name="input"),)
-output_path = "./model_saves/RT-implementation.onnx"
-model_proto, _ = tf2onnx.convert.from_keras(model, input_signature=spec, opset=13,output_path=output_path)
+# model = keras.models.load_model("./model_saves/400us3cells15units")
+# spec = (tf.TensorSpec((None, None, 16), tf.double, name="input"),)
+# output_path = "./model_saves/RT-implementation.onnx"
+# model_proto, _ = tf2onnx.convert.from_keras(model, input_signature=spec, opset=13,output_path=output_path)
 
-providers = ['CPUExecutionProvider']
-output_names = [n.name for n in model_proto.graph.output]
-m = rt.InferenceSession(output_path, providers=providers)
-onnx_pred = m.run(output_names, {"input": X_test})
-onnx_pred = np.array(onnx_pred)
-preds = model.predict(X_test)
+# providers = ['CPUExecutionProvider']
+# output_names = [n.name for n in model_proto.graph.output]
+# m = rt.InferenceSession(output_path, providers=providers)
+# onnx_pred = m.run(output_names, {"input": X_test})
+# onnx_pred = np.array(onnx_pred)
+# preds = model.predict(X_test)
 
-plt.figure()
-plt.plot(onnx_pred.squeeze())
+# plt.figure()
+# plt.plot(onnx_pred.squeeze())
 
-# make sure ONNX and keras have the same results
-np.testing.assert_allclose(preds, onnx_pred[0], rtol=1e-5)
+# # make sure ONNX and keras have the same results
+# np.testing.assert_allclose(preds, onnx_pred[0], rtol=1e-5)
 
 
-np.savetxt("preprocessed_DROPBEAR_X.csv", X.squeeze(), delimiter=',');
-np.savetxt("preprocessed_DROPBEAR_t.csv", t, delimiter=',')
-np.savetxt("preprocessed_DROPBEAR_y.csv", y, delimiter=',')
-np.savetxt("model_prediction.csv", onnx_pred.squeeze(), delimiter=',')
+# np.savetxt("preprocessed_DROPBEAR_X.csv", X.squeeze(), delimiter=',');
+# np.savetxt("preprocessed_DROPBEAR_t.csv", t, delimiter=',')
+# np.savetxt("preprocessed_DROPBEAR_y.csv", y, delimiter=',')
+# np.savetxt("model_prediction.csv", onnx_pred.squeeze(), delimiter=',')
