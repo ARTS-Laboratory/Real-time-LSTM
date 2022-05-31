@@ -108,7 +108,7 @@ units_scheme = [40, 35, 30, 25, 20, 18, 15, 12, 10, 8]
 cells_scheme = [1, 2, 3]
 
 # indexing each training scheme for easier starting/stopping
-index = 137;
+index = 130;
 while(index < 210):
     i = index
     units_index = i % 10
@@ -144,7 +144,7 @@ while(index < 210):
     )
     y_test = np.expand_dims(y_test, -1)
     
-    model.fit(X_mini, y_mini, epochs=30)
+    model.fit(X_mini, y_mini, epochs=70)
     pred = pin_scaler.inverse_transform(model.predict(X)[0]).T
     dict_results[output_period, cells, units] = pred
     string_name = "%dus%dcells%dunits"%(output_period, cells, units)
@@ -219,7 +219,9 @@ for c in range(len(cells_scheme)):
             snr_table[c,i,j] = snr
 
 print(snr_table)
-np.savetxt("./prediction results/SNR table.csv", snr_table, delimiter=',')
+np.savetxt("./prediction results/SNR table 1 cell.csv", snr_table[0], delimiter=',')
+np.savetxt("./prediction results/SNR table 2 cell.csv", snr_table[1], delimiter=',')
+np.savetxt("./prediction results/SNR table 3 cell.csv", snr_table[2], delimiter=',')
 #%% SNR table for only validation profile
 
 snr_table = np.zeros(len(cells_scheme), len(output_period_scheme), len(units_scheme))

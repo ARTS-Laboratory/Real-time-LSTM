@@ -10,6 +10,7 @@ import math
 import scipy
 from scipy import signal
 from sklearn.metrics import mean_squared_error
+import sklearn as sk
 """
 A simple test that I wanted to do. Previously, I added a dense layer at the top
 of the model. This means that for the final layer, all of the units must be 
@@ -32,7 +33,6 @@ def preprocess(sampling_period):
     import json
     import pickle
     import numpy as np
-    import sklearn as sk
     import joblib
     f = open('data_6_with_FFT.json')
     data = json.load(f)
@@ -134,8 +134,19 @@ pred = pin_scaler.inverse_transform(dense_top_model.predict(X)[0])
 true = pin_scaler.inverse_transform(np.expand_dims(y,-1))
 snr = signaltonoise(true, pred)
 print("%f dB SNR for dense top model."%snr)
+# >>> 21.931982 dB SNR for dense top model.
+plt.figure(figsize=(6, 4))
+plt.plot(t, pred, label="model prediction")
+plt.plot(t, true, label="reference", alpha=.8)
+plt.legend()
+plt.tight_layout()
+plt.savefig("./plots/dense top model pred.png", dpi=500)
 #%%
 print("Training extract first element model...")
+normal_scaler = sk.preprocessing.MinMaxScaler()
+normal_scaler.fit(np.reshape(y, (-1,1)))
+y_first = normal_scaler.fit_transform(y_train.reshape(-1,1)).flatten()
+
 take_first = keras.layers.Lambda(lambda x: x[:,0])
 take_first_model = keras.Sequential((
     keras.layers.LSTM(units, return_sequences=True, input_shape=[None, 16]),
@@ -146,10 +157,22 @@ take_first_model = keras.Sequential((
 take_first_model.compile(loss="mse",
     optimizer="adam",
 )
-take_first_model.fit(X_mini, y_mini, epochs=70)
-pred = pin_scaler.inverse_transform(take_first_model.predict(X)).T
+
+X_first_mini, y_first_mini = split_train_random(X_train, y_first, 10000, int(.1/(output_period*10**-6)))
+
+take_first_model.fit(X_first_mini, y_first_mini, epochs=70)
+pred = take_first_model.predict(X)
+pred = normal_scaler.inverse_transform(pred)
+pred = pin_scaler.inverse_transform(pred).T
 snr = signaltonoise(true, pred)
 print("%f dB SNR for first element model."%snr)
+# >>> 22.492193 dB dB SNR for first element model.
+plt.figure(figsize=(6, 4))
+plt.plot(t, pred, label="model prediction")
+plt.plot(t, true, label="reference", alpha=.8)
+plt.legend()
+plt.tight_layout()
+plt.savefig("./plots/first element model pred.png", dpi=500)
 #%%
 print("Training norm of vector model...")
 # norm can't produce negative values
@@ -169,7 +192,15 @@ norm_vector_model.compile(loss="mse",
 
 X_norm_mini, y_norm_mini = split_train_random(X_train, y_norm, 10000, int(.1/(output_period*10**-6)))
 norm_vector_model.fit(X_norm_mini, y_norm_mini, epochs=70)
-pred = pin_scaler.inverse_transform(norm_vector_model.predict(X)).T
+pred = norm_vector_model.predict(X)
 pred = pred + np.min(y)
+pred = pin_scaler.inverse_transform(pred).T
 snr = signaltonoise(true, pred)
 print("%f dB SNR for norm of vector model."%snr)
+# >>> 24.030725 dB SNR for norm of vector model.
+plt.figure(figsize=(6, 4))
+plt.plot(t, pred, label="model prediction")
+plt.plot(t, true, label="reference", alpha=.8)
+plt.legend()
+plt.tight_layout()
+plt.savefig("./plots/vector norm model pred.png", dpi=500)
