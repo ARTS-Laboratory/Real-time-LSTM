@@ -11,7 +11,7 @@ import scipy
 from scipy import signal
 from sklearn.metrics import mean_squared_error
 """
-A simple test that 
+
 
 TensorFlow 2.5.0
 Numpy 1.19.5
