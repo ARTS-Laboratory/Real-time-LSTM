@@ -124,7 +124,7 @@ while(index < 210):
     # calling preprocess is only necessary when output period changes, but probably not the biggest time drag
     (X, X_train, X_test), (y, y_train, y_test), \
         (t, t_test, t_train), pin_scaler, acc_scaler = preprocess(sample_period)
-        
+    
     print("Now training model #%d/210, with %d us period, %d cells, %d units"
           %(index + 1, output_period, cells, units))
     

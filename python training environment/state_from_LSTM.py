@@ -204,3 +204,119 @@ plt.plot(t, true, label="reference", alpha=.8)
 plt.legend()
 plt.tight_layout()
 plt.savefig("./plots/vector norm model pred.png", dpi=500)
+#%% these classes don't work and i don't know why. i replaced them with just the 
+# lambda layers then a dense layer (without activation)
+
+# class TakeFirstElement(keras.layers.Layer):
+    
+#     def __init__(self):
+#         super(TakeFirstElement, self).__init__()
+#         self.scaler = self.add_weight(
+#             shape=(1,),
+#             name='scaler',
+#             trainable=True
+#         )
+    
+#     def call(self, x):
+#         return self.scaler * x[:,0]
+        
+# class NormVector(keras.layers.Layer):
+    
+#     def __init__(self):
+#         super(NormVector, self).__init__()
+#         self.scaler = self.add_weight(
+#             shape=(1,1),
+#             name='scaler',
+#             trainable=True
+#         )
+    
+# #     def compute_output_shape(input_shape):
+# #         return [input_shape[0], 1]
+        
+    
+#     def call(self, x):
+#         return self.scaler * tf.norm(x, axis=0)
+
+# make the models. 2 LSTM layers with 15 units then changing the top. For the first element and norm models, a dense layer 
+# used just to scale the result and add a bias (one weight, one bias)
+dense_top_model = keras.Sequential((
+    keras.layers.LSTM(15, return_sequences=True, input_shape=[None, 1]),
+    keras.layers.LSTM(15, return_sequences=True),
+    keras.layers.TimeDistributed(keras.layers.Dense(1))
+))
+first_element_model = keras.Sequential((
+    keras.layers.LSTM(15, return_sequences=True, input_shape=[None, 1]),
+    keras.layers.LSTM(15, return_sequences=True),
+    keras.layers.TimeDistributed(keras.layers.Lambda(keras.layers.Lambda(lambda x: x[:,0]))),
+    keras.layers.TimeDistributed(keras.layers.Dense(1))
+))
+norm_vector_model = keras.Sequential((
+    keras.layers.LSTM(15, return_sequences=True, input_shape=[None, 1]),
+    keras.layers.LSTM(15, return_sequences=True),
+    keras.layers.TimeDistributed(keras.layers.Lambda(lambda x: tf.norm(x, axis=1))),
+    keras.layers.TimeDistributed(keras.layers.Dense(1))
+))
+import numpy as np
+import matplotlib.pyplot as plt
+import tensorflow as tf
+import tensorflow.keras as keras
+from sklearn.metrics import mean_squared_error
+
+def generate_time_series(batch_size, n_steps, y_type = 'period'):
+    T = np.random.rand(1, batch_size, 1) * 8 + 2
+    phase = np.random.rand(1, batch_size, 1)*2*np.pi
+    A = np.random.rand(1, batch_size, 1)*9.8 + .2
+    time = np.linspace(0, n_steps, n_steps)
+    series = A * np.sin((time - phase)*2*np.pi/T)
+    series += 0.1 * (np.random.rand(1, batch_size, n_steps) - .5)
+    rtrn = np.expand_dims(np.squeeze(series.astype(np.float32)), axis=2)
+    if(y_type == 'amplitude'):
+        return rtrn, A.flatten()
+    if(y_type == 'frequency'):
+        return rtrn, 1/T.flatten()
+    if(y_type == 'next_element'):
+        return rtrn[:,:,:-1], rtrn[:,:,-1]
+    return rtrn, T.flatten()
+
+
+dense_top_model = keras.Sequential((
+    keras.layers.LSTM(15, return_sequences=True, input_shape=[None, 1]),
+    keras.layers.LSTM(15, return_sequences=True),
+    keras.layers.TimeDistributed(keras.layers.Dense(1))
+))
+first_element_model = keras.Sequential((
+    keras.layers.LSTM(15, return_sequences=True, input_shape=[None, 1]),
+    keras.layers.LSTM(15, return_sequences=True),
+    keras.layers.TimeDistributed(keras.layers.Lambda(keras.layers.Lambda(lambda x: x[:,0]))),
+    keras.layers.TimeDistributed(keras.layers.Dense(1))
+))
+norm_vector_model = keras.Sequential((
+    keras.layers.LSTM(15, return_sequences=True, input_shape=[None, 1]),
+    keras.layers.LSTM(15, return_sequences=True),
+    keras.layers.TimeDistributed(keras.layers.Lambda(lambda x: tf.norm(x, axis=1))),
+    keras.layers.TimeDistributed(keras.layers.Dense(1))
+))
+
+models = [dense_top_model, first_element_model, norm_vector_model]
+
+freq_rmse = [0,0,0] # this will fill with RMSE for each model type
+freq_val = [] # append validation losses to this list
+np.random.seed(42)
+n_steps = 75
+X, y = generate_time_series(10000, n_steps + 1, y_type='frequency')
+X_train = X[:7000]; y_train = y[:7000]
+X_test = X[7000:]; y_test = y[7000:]
+
+for i in range(3):
+    model = models[i]
+    model.compile(
+        loss="mse",
+        optimizer="adam",
+    )
+    hist = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=1)
+    freq_val.append(hist.history['val_loss'])
+    
+    pred = model.predict(X_test)[:,-1].flatten()
+    rmse = mean_squared_error(y_test, pred, squared=False)
+    freq_rmse[i] = rmse
+
