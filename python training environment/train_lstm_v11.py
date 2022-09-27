@@ -11,8 +11,6 @@ import scipy
 from scipy import signal
 from sklearn.metrics import mean_squared_error
 """
-
-
 TensorFlow 2.5.0
 Numpy 1.19.5
 onnxruntime 1.11.0 (for compatibility with Numpy)
