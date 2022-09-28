@@ -11,6 +11,8 @@ import scipy
 from scipy import signal
 from sklearn.metrics import mean_squared_error
 """
+Using online training method to see if that will reduce error
+
 TensorFlow 2.5.0
 Numpy 1.19.5
 onnxruntime 1.11.0 (for compatibility with Numpy)
@@ -79,6 +81,33 @@ def preprocess(sampling_period):
     
     return (X, X_train, X_test), (y, y_train, y_test), (t, t_test, t_train), pin_scaler, acc_scaler
 
+"""
+Training generator for online training. list all inputs. last arg should be y
+"""
+class TrainingGenerator(keras.utils.Sequence):
+    
+    def __init__(self, *args, train_len=400):
+        self.args = args
+        self.train_len = train_len
+        self.length = args[0].shape[1]//train_len
+    
+    def __len__(self):
+        return self.length
+    
+    def __getitem__(self, index):
+        # F_batch = self.F[:,index*self.train_len:(index+1)*self.train_len,:]
+        # lstm_batch = self.lstm_input[:,index*self.train_len:(index+1)*self.train_len,:]
+        # return lstm_batch, F_batch
+        rtrn = [arg[:,index*self.train_len:(index+1)*self.train_len,:] for arg in self.args]
+        
+        return rtrn[:-1], rtrn[-1] 
+
+class StateResetter(tf.keras.callbacks.Callback):
+    def on_epoch_end(self, epoch, logs={}):
+        for layer in self.model.layers:
+            if(layer.stateful):
+                layer.reset_states()
+
 def split_train_random(X_train, y_train, batch_size, train_len):
     run_size = X_train.shape[1]
     indices = [randint(0, run_size - train_len) for i in range(batch_size)]
@@ -123,13 +152,22 @@ while(index < 210):
     (X, X_train, X_test), (y, y_train, y_test), \
         (t, t_test, t_train), pin_scaler, acc_scaler = preprocess(sample_period)
     
+    # .1 sec training every time
+    training_generator = TrainingGenerator(X_train, y_train, int(.1/(output_period*10**-6)))
+    # X_mini, y_mini = split_train_random(X_train, y_train, 10000, int(.1/(output_period*10**-6)))
+    
     print("Now training model #%d/210, with %d us period, %d cells, %d units"
           %(index + 1, output_period, cells, units))
     
-    
-    
-    # .1 sec training every time
-    X_mini, y_mini = split_train_random(X_train, y_train, 10000, int(.1/(output_period*10**-6)))
+    early_stopping = tf.keras.callbacks.EarlyStopping(
+        monitor="val_loss",
+        # min_delta=0.001,
+        patience=3,
+        verbose=0,
+        mode="auto",
+        baseline=None,
+        restore_best_weights=True,
+    )
     
     model = keras.Sequential(
         [keras.layers.LSTM(units,return_sequences=True,input_shape=[None, 16])] + 
@@ -141,7 +179,13 @@ while(index < 210):
     )
     y_test = np.expand_dims(y_test, -1)
     
-    model.fit(X_mini, y_mini, epochs=30)
+    model.fit(
+        training_generator,
+        shuffle=False,
+        epochs=1000, 
+        validation_data = (X_test, y_test),
+        callbacks = [early_stopping, StateResetter()],
+    )
     pred = pin_scaler.inverse_transform(model.predict(X)[0]).T
     dict_results[output_period, cells, units] = pred
     string_name = "%dus%dcells%dunits"%(output_period, cells, units)
