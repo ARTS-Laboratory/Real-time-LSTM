@@ -141,7 +141,11 @@ while(index < 210):
     )
     y_test = np.expand_dims(y_test, -1)
     
-    model.fit(X_mini, y_mini, epochs=30)
+    model.fit(
+        X_mini, y_mini, 
+        validation_data=(X_test, y_test.reshape(1, -1, 1)),
+        epochs=30,
+    )
     pred = pin_scaler.inverse_transform(model.predict(X)[0]).T
     dict_results[output_period, cells, units] = pred
     string_name = "%dus%dcells%dunits"%(output_period, cells, units)

@@ -69,15 +69,18 @@ def preprocess(sampling_period):
     t = np.reshape(resample_t[:resample_t.size//ds*ds], (resample_t.size//ds, ds)).T[0]
     y = np.reshape(pin[:pin.size//ds*ds], (pin.size//ds, ds)).T[0]
     
+    y = y.reshape(1, -1, 1)
+    t = t.reshape(1, -1, 1)
     X = np.expand_dims(X, 0)
     
-    X_train = X[:,t<30.7]
-    y_train = y[t<30.7]
-    t_train = t[t<30.7]
+    X_train = X[:,t.flatten()<30.7]
+    y_train = y[:,t.flatten()<30.7]
+    t_train = t[:,t.flatten()<30.7]
     
-    X_test = X[:,t>30.7]
-    y_test = y[t>30.7]
-    t_test = t[t>30.7]
+    X_test = X[:,t.flatten()>30.7]
+    y_test = y[:,t.flatten()>30.7]
+    t_test = t[:,t.flatten()>30.7]
+    
     
     return (X, X_train, X_test), (y, y_train, y_test), (t, t_test, t_train), pin_scaler, acc_scaler
 
@@ -153,7 +156,8 @@ while(index < 210):
         (t, t_test, t_train), pin_scaler, acc_scaler = preprocess(sample_period)
     
     # .1 sec training every time
-    training_generator = TrainingGenerator(X_train, y_train, int(.1/(output_period*10**-6)))
+    train_time = .4
+    training_generator = TrainingGenerator(X, y, train_len = int(train_time/(output_period*10**-6)))
     # X_mini, y_mini = split_train_random(X_train, y_train, 10000, int(.1/(output_period*10**-6)))
     
     print("Now training model #%d/210, with %d us period, %d cells, %d units"
@@ -162,20 +166,21 @@ while(index < 210):
     early_stopping = tf.keras.callbacks.EarlyStopping(
         monitor="val_loss",
         # min_delta=0.001,
-        patience=3,
+        patience=10,
         verbose=0,
         mode="auto",
         baseline=None,
         restore_best_weights=True,
     )
-    
+    stateful=True
     model = keras.Sequential(
-        [keras.layers.LSTM(units,return_sequences=True,input_shape=[None, 16])] + 
-        [keras.layers.LSTM(units, return_sequences = True) for i in range(cells - 1)] +
+        [keras.layers.LSTM(units,return_sequences=True,stateful=True, batch_input_shape=[1, None, 16])] + 
+        [keras.layers.LSTM(units, return_sequences = True, stateful=True) for i in range(cells - 1)] +
         [keras.layers.TimeDistributed(keras.layers.Dense(1))]
     )
-    model.compile(loss="mse",
-        optimizer="adam",
+    model.compile(
+        loss="mse",
+        optimizer=keras.optimizers.Adam(learning_rate=0.0005),
     )
     y_test = np.expand_dims(y_test, -1)
     
@@ -183,7 +188,7 @@ while(index < 210):
         training_generator,
         shuffle=False,
         epochs=1000, 
-        validation_data = (X_test, y_test),
+        validation_data = (X, y),
         callbacks = [early_stopping, StateResetter()],
     )
     pred = pin_scaler.inverse_transform(model.predict(X)[0]).T
