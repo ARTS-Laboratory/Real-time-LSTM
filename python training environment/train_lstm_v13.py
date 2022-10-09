@@ -154,7 +154,7 @@ units_scheme = [40, 35, 30, 25, 20, 18, 15, 12, 10, 8]
 cells_scheme = [1, 2, 3]
 
 # indexing each training scheme for easier starting/stopping
-index = 64;
+index = 138;
 while(index < 210):
     i = index
     units_index = i % 10
@@ -174,43 +174,43 @@ while(index < 210):
     
     print("Now training model #%d/210, with %d us period, %d cells, %d units"
           %(index, output_period, cells, units))
-    
-    # .1 sec training every time
-    X_mini, y_mini = split_train_random(X_train, y_train, 10000, int(.1/(output_period*10**-6)))
-    
-    early_stopping = DelayEarlyStopping(
-        start_epoch=30,
-        monitor="val_loss",
-        # min_delta=0.001,
-        patience=10,
-        verbose=0,
-        mode="auto",
-        restore_best_weights=True,
-    )
-    
-    model = keras.Sequential(
-        [keras.layers.LSTM(units,return_sequences=True,input_shape=[None, 16])] + 
-        [keras.layers.LSTM(units, return_sequences = True) for i in range(cells - 1)] +
-        [keras.layers.TimeDistributed(keras.layers.Dense(1))]
-    )
-    model.compile(
-        loss="mse",
-        optimizer=keras.optimizers.Adam(learning_rate=0.0005),
-    )
-    y_test = np.expand_dims(y_test, -1)
-    
-    model.fit(
-        X_mini, y_mini,
-        shuffle=False,
-        epochs=1000, 
-        validation_data = (X, y.reshape(1, -1, 1)),
-        callbacks = [early_stopping, StateResetter()],
-    )
-    pred = pin_scaler.inverse_transform(model.predict(X)[0]).T
-    dict_results[output_period, cells, units] = pred
-    string_name = "%dus%dcells%dunits"%(output_period, cells, units)
-    np.save("./prediction results/" + string_name, pred)
-    model.save("./model_saves/" + string_name)
+    if(output_period != 100):
+        # .1 sec training every time
+        X_mini, y_mini = split_train_random(X_train, y_train, 10000, int(.1/(output_period*10**-6)))
+        
+        early_stopping = DelayEarlyStopping(
+            start_epoch=30,
+            monitor="val_loss",
+            # min_delta=0.001,
+            patience=10,
+            verbose=0,
+            mode="auto",
+            restore_best_weights=True,
+        )
+        
+        model = keras.Sequential(
+            [keras.layers.LSTM(units,return_sequences=True,input_shape=[None, 16])] + 
+            [keras.layers.LSTM(units, return_sequences = True) for i in range(cells - 1)] +
+            [keras.layers.TimeDistributed(keras.layers.Dense(1))]
+        )
+        model.compile(
+            loss="mse",
+            optimizer=keras.optimizers.Adam(learning_rate=0.0005),
+        )
+        y_test = np.expand_dims(y_test, -1)
+        
+        model.fit(
+            X_mini, y_mini,
+            shuffle=False,
+            epochs=1000, 
+            validation_data = (X, y.reshape(1, -1, 1)),
+            callbacks = [early_stopping, StateResetter()],
+        )
+        pred = pin_scaler.inverse_transform(model.predict(X)[0]).T
+        dict_results[output_period, cells, units] = pred
+        string_name = "%dus%dcells%dunits"%(output_period, cells, units)
+        np.save("./prediction results/" + string_name, pred)
+        model.save("./model_saves/" + string_name)
     
     index += 1
     
@@ -280,7 +280,9 @@ for c in range(len(cells_scheme)):
             snr_table[c,i,j] = snr
 
 print(snr_table)
-np.savetxt("./prediction results/SNR table.csv", snr_table, delimiter=',')
+np.savetxt("./prediction results/SNR table 1 cell.csv", snr_table[0], delimiter=',')
+np.savetxt("./prediction results/SNR table 2 cell.csv", snr_table[1], delimiter=',')
+np.savetxt("./prediction results/SNR table 3 cell.csv", snr_table[2], delimiter=',')
 #%% SNR table for only validation profile
 
 snr_table = np.zeros(len(cells_scheme), len(output_period_scheme), len(units_scheme))
