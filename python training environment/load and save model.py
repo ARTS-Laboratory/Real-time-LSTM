@@ -108,7 +108,6 @@ def save_model_weights_as_csv(model, savpath = "./model_weights"):
     savetxt(layer_path+"weights.csv",in_weights,delimiter=',')
     savetxt(layer_path+"bias.csv",out_weights,delimiter=',')
 
-<<<<<<< Updated upstream
 if __name__ == "__main__":
     sample_period = 400*10**-6/16
     # calling preprocess is only necessary when output period changes, but probably not the biggest time drag
@@ -142,8 +141,6 @@ if __name__ == "__main__":
     plt.legend(loc=1)
     plt.tight_layout()
     
-    
-=======
 
 model = keras.models.load_model("./model_saves/frequency")
 # model = tf.saved_model.load("./model_saves/400us3cells15units")
@@ -153,4 +150,5 @@ t = np.loadtxt("preprocessed_DROPBEAR_t.csv", delimiter=',')
 y = np.loadtxt("preprocessed_DROPBEAR_y.csv", delimiter=',')
 
 p = model.predict(X)
->>>>>>> Stashed changes
+#%%
+model = keras.models.load_model("./model_saves/500us2cells15units", compile=False, custom_objects={'early_stopping': None, 'state_resetter': None})

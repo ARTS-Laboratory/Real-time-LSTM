@@ -283,10 +283,8 @@ print(snr_table)
 np.savetxt("./prediction results/SNR table 1 cell.csv", snr_table[0], delimiter=',')
 np.savetxt("./prediction results/SNR table 2 cell.csv", snr_table[1], delimiter=',')
 np.savetxt("./prediction results/SNR table 3 cell.csv", snr_table[2], delimiter=',')
-#%% SNR table for only validation profile
-
-snr_table = np.zeros(len(cells_scheme), len(output_period_scheme), len(units_scheme))
-
+#%%
+rmse_table = np.zeros((len(cells_scheme), len(output_period_scheme), len(units_scheme)))
 for c in range(len(cells_scheme)):
     cells = cells_scheme[c]
     for i in range(len(output_period_scheme)):
@@ -294,22 +292,16 @@ for c in range(len(cells_scheme)):
         sample_period = output_period*(10**-6)/16
         (X, X_train, X_test), (y, y_train, y_test), \
             (t, t_test, t_train), pin_scaler, acc_scaler = preprocess(sample_period)
-        true = pin_scaler.inverse_transform(np.expand_dims(y_train,-1))
         for j in range(len(units_scheme)):
             units = units_scheme[j]
-            string_name = "%dus%dcells%dunits"%(output_period, cells, units)
-            print("inferring for "+ string_name)
-            model = keras.models.load_model("C:/Users/dncob/Documents/GitHub/LSTM-acceleration-with-singular-value-decomposition/code/model_saves/" + string_name)
-            pred = pin_scaler.inverse_transform(model.predict(X_test)[0]).T
-            snr = signaltonoise(true, pred)
-            snr_table[c,i,j] = snr
+            pred = dict_results[output_period, cells, units].T
+            true = pin_scaler.inverse_transform(np.expand_dims(y,-1))
+            rmse = mean_squared_error(true, pred, squared=False)
+            rmse_table[c,i,j] = rmse
 
-print(snr_table)
-np.savetxt("./prediction results/1 Cell SNR table.csv", snr_table[0], delimiter=',')
-np.savetxt("./prediction results/2 Cell SNR table.csv", snr_table[1], delimiter=',')
-np.savetxt("./prediction results/3 Cell SNR table.csv", snr_table[2], delimiter=',')
-
-
+np.savetxt("./prediction results/RMSE table 1 cell.csv", rmse_table[0], delimiter=',')
+np.savetxt("./prediction results/RMSE table 2 cell.csv", rmse_table[1], delimiter=',')
+np.savetxt("./prediction results/RMSE table 3 cell.csv", rmse_table[2], delimiter=',')
 #%% save model in ONNX format
 # import tf2onnx
 # import onnx
@@ -338,7 +330,7 @@ np.savetxt("./prediction results/3 Cell SNR table.csv", snr_table[2], delimiter=
 # np.testing.assert_allclose(preds, onnx_pred[0], rtol=1e-5)
 
 
-# np.savetxt("preprocessed_DROPBEAR_X.csv", X.squeeze(), delimiter=',');
-# np.savetxt("preprocessed_DROPBEAR_t.csv", t, delimiter=',')
-# np.savetxt("preprocessed_DROPBEAR_y.csv", y, delimiter=',')
+np.savetxt("preprocessed_DROPBEAR_500us_X.csv", X.squeeze(), delimiter=',');
+np.savetxt("preprocessed_DROPBEAR_500us_t.csv", t, delimiter=',')
+np.savetxt("preprocessed_DROPBEAR_500us_y.csv", y, delimiter=',')
 # np.savetxt("model_prediction.csv", onnx_pred.squeeze(), delimiter=',')
