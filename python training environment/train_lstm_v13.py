@@ -333,4 +333,5 @@ np.savetxt("./prediction results/RMSE table 3 cell.csv", rmse_table[2], delimite
 # np.savetxt("preprocessed_DROPBEAR_500us_X.csv", X.squeeze(), delimiter=',');
 # np.savetxt("preprocessed_DROPBEAR_500us_t.csv", t, delimiter=',')
 # np.savetxt("preprocessed_DROPBEAR_500us_y.csv", y, delimiter=',')
+# np.savetxt("model output.csv", y_pred, delimiter=',')
 # np.savetxt("model_prediction.csv", onnx_pred.squeeze(), delimiter=',')
