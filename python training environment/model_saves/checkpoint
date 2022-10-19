@@ -1,0 +1,2 @@
+model_checkpoint_path: "500us3cells15unitsweights"
+all_model_checkpoint_paths: "500us3cells15unitsweights"
