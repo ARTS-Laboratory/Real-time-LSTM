@@ -1,6 +1,8 @@
 import tensorflow.keras as keras
 from time import perf_counter
 from scipy import signal
+import matplotlib.pyplot as plt
+import numpy as np
 """
 Testing the model timing on a GPOS (Windows)
 """
@@ -62,8 +64,8 @@ def preprocess(sampling_period):
     
     return (X, X_train, X_test), (y, y_train, y_test), (t, t_test, t_train), pin_scaler, acc_scaler
 #%% load model and resave weights
-model = keras.models.load_model('./model_saves/500us3cells15units')
-model.save_weights('./model_saves/500us3cells15unitsweights')
+# model = keras.models.load_model('./model_saves/500us3cells15units')
+# model.save_weights('./model_saves/500us3cells15unitsweights')
 #%%
 units = 15
 model = keras.Sequential([
@@ -73,11 +75,12 @@ model = keras.Sequential([
     keras.layers.TimeDistributed(keras.layers.Dense(1))
 ])
 model.load_weights('./model_saves/500us3cells15unitsweights')
+model.compile()
 #%%
 sample_period = 500*10**-6/16
 (X, X_train, X_test), (y, y_train, y_test), \
     (t, t_test, t_train), pin_scaler, acc_scaler = preprocess(sample_period)
-
+#%%
 print('beginning prediction...')
 start_time = perf_counter()
 y_pred = model.predict(X)
@@ -85,5 +88,37 @@ stop_time = perf_counter()
 tot_time = stop_time - start_time
 avg_time = tot_time/X.shape[1]
 
-print('full pass prediction: %f s'%tot_time)
-print('per time step: %f us'%avg_time*10**6)
+print('full pass time: ' + str(tot_time) + ' s')
+print('per time step: ' + str(avg_time*10**6) + ' us')
+#%%
+plt.figure()
+plt.plot(y_pred.flatten())
+#%% element by element
+units = 15
+model = keras.Sequential([
+    keras.layers.LSTM(units,return_sequences=True, batch_input_shape=[1, None, 16], stateful=True),
+    keras.layers.LSTM(units,return_sequences=True, stateful=True),
+    keras.layers.LSTM(units,return_sequences=True, stateful=True),
+    keras.layers.TimeDistributed(keras.layers.Dense(1))
+])
+model.load_weights('./model_saves/500us3cells15unitsweights')
+#%%
+time_steps = X.shape[1]
+timing_dist = np.zeros((X.shape[1]))
+print('beginning prediction...')
+for i in range(time_steps):
+    x = X[:,i:i+1,:]
+    start_time = perf_counter()
+    yp = model.predict(x)
+    stop_time = perf_counter()
+    timing_dist[i] = stop_time - start_time
+    # print(i)
+    if(i%1000 == 0):
+        print('%f percent complete'%round(i/time_steps))
+
+avg_time = np.average(timing_dist)
+std = np.std(timing_dist)
+full_pass_time = np.sum(timing_dist)
+print('full pass time: ' + str(full_pass_time) + ' s')
+print('per time step: ' + str(avg_time*10**6) + ' us')
+print('standard dev.: ' + str(std*10**6) + ' us')
