@@ -302,6 +302,42 @@ for c in range(len(cells_scheme)):
 np.savetxt("./prediction results/RMSE table 1 cell.csv", rmse_table[0], delimiter=',')
 np.savetxt("./prediction results/RMSE table 2 cell.csv", rmse_table[1], delimiter=',')
 np.savetxt("./prediction results/RMSE table 3 cell.csv", rmse_table[2], delimiter=',')
+#%% make plots for each prediction
+index = 0
+while(index < 210):
+    i = index
+    units_index = i % 10
+    i //= 10
+    output_period_index = i % 7
+    i //= 7
+    cells_index = i
+    
+    cells = cells_scheme[cells_index]
+    output_period = output_period_scheme[output_period_index]
+    units = units_scheme[units_index]
+    string_name = "%dus%dcells%dunits"%(output_period, cells, units)
+    sample_period = output_period*10**-6/16
+    (X, X_train, X_test), (y, y_train, y_test), \
+        (t, t_test, t_train), pin_scaler, acc_scaler = preprocess(sample_period)
+    
+    y_true = pin_scaler.inverse_transform(y.reshape(1,-1))
+    y_pred = dict_results[output_period, cells, units]
+    
+    plt.figure(figsize=(6,2.5))
+    plt.plot(t, y_true.flatten(), label='reference')
+    plt.plot(t, y_pred.flatten(), label='prediction')
+    plt.xlabel("time (s)")
+    plt.ylabel("roller location (m)")
+    plt.ylim((0.045, .19))
+    plt.xlim((0,t[-1]))
+    plt.legend(loc=2, fancybox=False, framealpha=1)
+    plt.grid()
+    plt.tight_layout()
+    plt.savefig("./plots/%s.png"%string_name, dpi=500)
+    plt.close()
+    index += 1
+
+
 #%% save model in ONNX format
 # import tf2onnx
 # import onnx
@@ -335,3 +371,7 @@ np.savetxt("./prediction results/RMSE table 3 cell.csv", rmse_table[2], delimite
 # np.savetxt("preprocessed_DROPBEAR_500us_y.csv", y, delimiter=',')
 # np.savetxt("model output.csv", y_pred, delimiter=',')
 # np.savetxt("model_prediction.csv", onnx_pred.squeeze(), delimiter=',')
+
+# plt.figure()
+# plt.plot(pin_scaler.inverse_transform(y).flatten())
+# plt.plot(y_pred.flatten())
