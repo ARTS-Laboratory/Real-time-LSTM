@@ -21,6 +21,7 @@
 		<Property Name="specify.custom.address" Type="Bool">false</Property>
 		<Item Name="mul gpos.vi" Type="VI" URL="../mul gpos.vi"/>
 		<Item Name="save rtos distribution.vi" Type="VI" URL="../save rtos distribution.vi"/>
+		<Item Name="time multiply.vi" Type="VI" URL="../time multiply.vi"/>
 		<Item Name="Dependencies" Type="Dependencies">
 			<Item Name="vi.lib" Type="Folder">
 				<Item Name="NI_AALBase.lvlib" Type="Library" URL="/&lt;vilib&gt;/Analysis/NI_AALBase.lvlib"/>
@@ -249,8 +250,11 @@ AddOutputFilter chunkFilter
 			</Item>
 		</Item>
 		<Item Name="library.lvlib" Type="Library" URL="../results/library.lvlib"/>
+		<Item Name="mul priority.vi" Type="VI" URL="../mul priority.vi"/>
 		<Item Name="mul rtos.vi" Type="VI" URL="../mul rtos.vi"/>
+		<Item Name="sig priority.vi" Type="VI" URL="../sig priority.vi"/>
 		<Item Name="sig rtos.vi" Type="VI" URL="../sig rtos.vi"/>
+		<Item Name="time multiply.vi" Type="VI" URL="../time multiply.vi"/>
 		<Item Name="Dependencies" Type="Dependencies">
 			<Item Name="vi.lib" Type="Folder">
 				<Item Name="NI_AALBase.lvlib" Type="Library" URL="/&lt;vilib&gt;/Analysis/NI_AALBase.lvlib"/>
