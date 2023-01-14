@@ -1,0 +1,1 @@
+This folder contains only the files needed to load the model and perform an inferrence.
