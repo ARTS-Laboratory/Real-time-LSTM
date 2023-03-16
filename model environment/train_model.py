@@ -70,7 +70,7 @@ t = np.array([1/400*i for i in range(X.shape[1])])
 units = 15
 model = keras.Sequential([
     keras.layers.LSTM(units, return_sequences=True, input_shape=[None, 16]), 
-    keras.layers.LSTM(units, return_sequences = True), 
+    keras.layers.LSTM(units, return_sequences = True),
     keras.layers.TimeDistributed(keras.layers.Dense(1))
 ])
 model.compile(
