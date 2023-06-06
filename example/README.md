@@ -1,4 +1,4 @@
-This folder contains an example of training a model to get good convergence. The trained model has three sequential LSTM cells each with 20 units. The training process is detailed below. 
+This folder contains an example of training an LSTM model to get good convergence. The trained model has three sequential LSTM cells each with 20 units. The training process is detailed below. 
 ## Training methodolgy
 Tunable hyperparameters:
 |parameter|value|
