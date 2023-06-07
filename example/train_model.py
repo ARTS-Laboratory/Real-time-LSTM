@@ -81,6 +81,7 @@ train_len = 400
 
 batches = X.shape[1]//train_len
 
+# shape training data to [batches, time, features]
 X_train = X[:,:batches*train_len,:]
 y_train = y[:,:batches*train_len,:]
 X_train = X_train.reshape(batches, train_len, 16)
